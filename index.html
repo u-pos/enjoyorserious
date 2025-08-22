@@ -163,7 +163,8 @@ function showResult(){
 
   document.getElementById("quiz").innerHTML="";
   document.getElementById("result").innerHTML=`
-    <p>判定：<strong>${rank}</strong></p>
+    <p>結果発表</p><br />
+    <p>あなたはおそらく<strong>${rank}</strong>です。</p>
     <button class="share-btn" onclick="shareResult('${rank}')">結果をXでシェア</button>
   `;
   document.getElementById("progressBar").style.width="100%";
