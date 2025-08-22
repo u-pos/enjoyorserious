@@ -5,7 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DBDガチ勢チェックテスト</title>
   <style>
-    body { font-family: "Segoe UI", sans-serif; margin: 0; background: #111; color: #fff; }
+   body { 
+  font-family: "Segoe UI", sans-serif; 
+  margin: 0; 
+  background: #001f3f;  /* ← 紺色に変更 */
+  color: #fff; 
+}
     h1 { text-align: center; padding: 15px; color: #f33; font-size: 22px; }
     #progressBarContainer { width: 100%; background: #333; height: 8px; border-radius: 4px; margin: 10px 0; }
     #progressBar { width: 0%; height: 100%; background: #f33; border-radius: 4px; transition: width 0.3s; }
@@ -23,6 +28,17 @@
       transition: 0.2s;
     }
     .option-btn:hover { background: #333; }
+    #backBtn {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #555;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    #backBtn:disabled { background: #333; cursor: not-allowed; }
     #result { text-align: center; font-size: 20px; margin-top: 30px; }
     .share-btn {
       background: #1DA1F2;
@@ -41,7 +57,11 @@
   <h1>DBDガチ勢チェックテスト</h1>
   <div id="progressBarContainer"><div id="progressBar"></div></div>
   <div class="container">
-    <div id="quiz"></div>
+    <div id="quiz">
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <button id="backBtn" onclick="goBack()" disabled>戻る</button>
+    </div>
     <div id="result"></div>
   </div>
 
@@ -49,53 +69,74 @@
     const questions = [
       { text: "発電機を回さないサバイバーがいるとイラっとする", reverse: false },
       { text: "リザルト画面で相手のパークやアドオンを確認し、反省や対策をする", reverse: false },
-      { text: "通電を目的として遊んでいない", reverse: true },
       { text: "勝ち負けにこだわってプレイしている", reverse: false },
-      { text: "スクショポイントを探したり、フレンド間で集まってエモートや屈伸で遊ぶことがある", reverse: true },
       { text: "VCで味方にマップ報告することが多い", reverse: false },
+      { text: "通電を目的として遊んでいない", reverse: true },
       { text: "ほぼ全てのパーク効果を把握している自信がある", reverse: false },
-      { text: "色んなおもしろパーク構成を試してプレイしている", reverse: true },
       { text: "上級者のプレイ動画をよく見て勉強している", reverse: false },
+      { text: "スクショポイントを探したり、フレンド間で集まってエモートや屈伸で遊ぶことがある", reverse: true },
+      { text: "色んなおもしろパーク構成を試してプレイしている", reverse: true },
       { text: "キャラクターが目立つスキンでも、面白さやかわいさの方を優先してスキンを選んでいる", reverse: true }
+    ];
+
+    const options = [
+      "全くそう思わない",
+      "どちらかというとそう思わない",
+      "どちらでもない（時と場合による）",
+      "どちらかというとそう思う",
+      "強くそう思う"
     ];
 
     let currentQuestion = 0;
     let score = 0;
+    let answers = [];
 
-    function showQuestion() {
-      if (currentQuestion >= questions.length) {
-        showResult();
-        return;
-      }
-
-      const q = questions[currentQuestion];
-      document.getElementById("quiz").innerHTML = `
-        <div class="question">${currentQuestion + 1}. ${q.text}</div>
-        <div class="options">
-          <button class="option-btn" onclick="answer(1)">1 全くそう思わない</button>
-          <button class="option-btn" onclick="answer(2)">2 どちらかというとそう思わない</button>
-          <button class="option-btn" onclick="answer(3)">3 どちらでもない</button>
-          <button class="option-btn" onclick="answer(4)">4 どちらかというとそう思う</button>
-          <button class="option-btn" onclick="answer(5)">5 強くそう思う</button>
-        </div>
-      `;
-
-      // プログレスバー更新
-      const progress = ((currentQuestion) / questions.length) * 100;
-      document.getElementById("progressBar").style.width = progress + "%";
+    function loadQuestion() {
+      document.getElementById("question").innerText = questions[currentQuestion].text;
+      const opts = document.getElementById("options");
+      opts.innerHTML = "";
+      options.forEach((opt, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.classList.add("option-btn");
+        btn.onclick = () => selectAnswer(index + 1);
+        opts.appendChild(btn);
+      });
+      document.getElementById("backBtn").disabled = currentQuestion === 0;
+      updateProgress();
     }
 
-    function answer(value) {
+    function selectAnswer(choice) {
       const q = questions[currentQuestion];
-      score += q.reverse ? (6 - value) : value;
+      let point = q.reverse ? (6 - choice) : choice;
+
+      answers[currentQuestion] = point;
+      score = answers.reduce((a, b) => a + (b || 0), 0);
+
       currentQuestion++;
-      showQuestion();
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function goBack() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        answers[currentQuestion] = null;
+        score = answers.reduce((a, b) => a + (b || 0), 0);
+        loadQuestion();
+      }
+    }
+
+    function updateProgress() {
+      const percent = ((currentQuestion) / questions.length) * 100;
+      document.getElementById("progressBar").style.width = percent + "%";
     }
 
     function showResult() {
-      const progress = 100;
-      document.getElementById("progressBar").style.width = progress + "%";
-
+      document.getElementById("quiz").style.display = "none";
       let resultText = "";
       if (score <= 15) resultText = "超絶エンジョイ勢";
       else if (score <= 20) resultText = "エンジョイ勢";
@@ -105,21 +146,20 @@
       else if (score <= 45) resultText = "ガチ勢";
       else resultText = "超絶ガチ勢";
 
-      document.getElementById("quiz").innerHTML = "";
       document.getElementById("result").innerHTML = `
-        <p>あなたの合計点は <strong>${score}</strong> 点です！</p>
-        <p>診断結果：<strong>${resultText}</strong></p>
-        <button class="share-btn" onclick="shareToX(${score}, '${resultText}')">Xで結果をシェア</button>
+        <p>あなたのスコアは <strong>${score}</strong> 点 / 50 点</p>
+        <p>判定: <strong>${resultText}</strong></p>
+        <button class="share-btn" onclick="shareResult('${resultText}', ${score})">結果をXでシェア</button>
       `;
     }
 
-    function shareToX(score, result) {
-      const text = `DBDガチ勢チェックテストの結果は「${result}」でした！（${score}点/50点） #DBD #ガチ勢チェック`;
+    function shareResult(resultText, score) {
       const url = encodeURIComponent(window.location.href);
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`, "_blank");
+      const text = encodeURIComponent(`DBDガチ勢チェックの結果: ${score}点 / 50点 (${resultText}) #DBD #ガチ勢チェック`);
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
     }
 
-    showQuestion();
+    loadQuestion();
   </script>
 </body>
 </html>
