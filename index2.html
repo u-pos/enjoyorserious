@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DBDガチ勢チェックテスト</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; margin: 0; background: #111; color: #fff; }
+    h1 { text-align: center; padding: 15px; color: #f33; font-size: 22px; }
+    #progressBarContainer { width: 100%; background: #333; height: 8px; border-radius: 4px; margin: 10px 0; }
+    #progressBar { width: 0%; height: 100%; background: #f33; border-radius: 4px; transition: width 0.3s; }
+    .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+    .question { font-size: 18px; margin: 20px 0; text-align: center; }
+    .options { display: grid; gap: 10px; margin-top: 20px; }
+    .option-btn {
+      padding: 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .option-btn:hover { background: #333; }
+    #result { text-align: center; font-size: 20px; margin-top: 30px; }
+    .share-btn {
+      background: #1DA1F2;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .share-btn:hover { background: #0d8ddb; }
+  </style>
+</head>
+<body>
+  <h1>DBDガチ勢チェックテスト</h1>
+  <div id="progressBarContainer"><div id="progressBar"></div></div>
+  <div class="container">
+    <div id="quiz"></div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      { text: "発電機を回さないサバイバーがいるとイラっとする", reverse: false },
+      { text: "リザルト画面で相手のパークやアドオンを確認し、反省や対策をする", reverse: false },
+      { text: "通電を目的として遊んでいない", reverse: true },
+      { text: "勝ち負けにこだわってプレイしている", reverse: false },
+      { text: "スクショポイントを探したり、フレンド間で集まってエモートや屈伸で遊ぶことがある", reverse: true },
+      { text: "VCで味方にマップ報告することが多い", reverse: false },
+      { text: "ほぼ全てのパーク効果を把握している自信がある", reverse: false },
+      { text: "色んなおもしろパーク構成を試してプレイしている", reverse: true },
+      { text: "上級者のプレイ動画をよく見て勉強している", reverse: false },
+      { text: "キャラクターが目立つスキンでも、面白さやかわいさの方を優先してスキンを選んでいる", reverse: true }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    function showQuestion() {
+      if (currentQuestion >= questions.length) {
+        showResult();
+        return;
+      }
+
+      const q = questions[currentQuestion];
+      document.getElementById("quiz").innerHTML = `
+        <div class="question">${currentQuestion + 1}. ${q.text}</div>
+        <div class="options">
+          <button class="option-btn" onclick="answer(1)">1 全くそう思わない</button>
+          <button class="option-btn" onclick="answer(2)">2 どちらかというとそう思わない</button>
+          <button class="option-btn" onclick="answer(3)">3 どちらでもない</button>
+          <button class="option-btn" onclick="answer(4)">4 どちらかというとそう思う</button>
+          <button class="option-btn" onclick="answer(5)">5 強くそう思う</button>
+        </div>
+      `;
+
+      // プログレスバー更新
+      const progress = ((currentQuestion) / questions.length) * 100;
+      document.getElementById("progressBar").style.width = progress + "%";
+    }
+
+    function answer(value) {
+      const q = questions[currentQuestion];
+      score += q.reverse ? (6 - value) : value;
+      currentQuestion++;
+      showQuestion();
+    }
+
+    function showResult() {
+      const progress = 100;
+      document.getElementById("progressBar").style.width = progress + "%";
+
+      let resultText = "";
+      if (score <= 15) resultText = "超絶エンジョイ勢";
+      else if (score <= 20) resultText = "エンジョイ勢";
+      else if (score <= 25) resultText = "ややエンジョイ勢寄り";
+      else if (score <= 35) resultText = "どちらでもない";
+      else if (score <= 40) resultText = "ややガチ勢寄り";
+      else if (score <= 45) resultText = "ガチ勢";
+      else resultText = "超絶ガチ勢";
+
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("result").innerHTML = `
+        <p>あなたの合計点は <strong>${score}</strong> 点です！</p>
+        <p>診断結果：<strong>${resultText}</strong></p>
+        <button class="share-btn" onclick="shareToX(${score}, '${resultText}')">Xで結果をシェア</button>
+      `;
+    }
+
+    function shareToX(score, result) {
+      const text = `DBDガチ勢チェックテストの結果は「${result}」でした！（${score}点/50点） #DBD #ガチ勢チェック`;
+      const url = encodeURIComponent(window.location.href);
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`, "_blank");
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
