@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DBDガチ勢チェックテスト</title>
   <style>
-   body { 
-  font-family: "Segoe UI", sans-serif; 
-  margin: 0; 
-  background: #001f3f;  /* ← 紺色に変更 */
-  color: #fff; 
-}
+    body { 
+      font-family: "Segoe UI", sans-serif; 
+      margin: 0; 
+      background: #001f3f;  /* 紺色背景 */
+      color: #fff; 
+    }
     h1 { text-align: center; padding: 15px; color: #f33; font-size: 22px; }
     #progressBarContainer { width: 100%; background: #333; height: 8px; border-radius: 4px; margin: 10px 0; }
     #progressBar { width: 0%; height: 100%; background: #f33; border-radius: 4px; transition: width 0.3s; }
@@ -29,16 +29,16 @@
     }
     .option-btn:hover { background: #333; }
     #backBtn {
-      padding: 12px;
-      font-size: 16px;
+      margin-top: 15px;
+      padding: 10px 15px;
+      font-size: 14px;
+      background: #444;
       border: none;
-      border-radius: 10px;
-      background: #555;
+      border-radius: 8px;
       color: #fff;
       cursor: pointer;
-      margin-top: 15px;
     }
-    #backBtn:disabled { background: #333; cursor: not-allowed; }
+    #backBtn:hover { background: #666; }
     #result { text-align: center; font-size: 20px; margin-top: 30px; }
     .share-btn {
       background: #1DA1F2;
@@ -51,32 +51,32 @@
       margin-top: 20px;
     }
     .share-btn:hover { background: #0d8ddb; }
+    img.header-img { width: 100%; max-height: 200px; object-fit: cover; }
   </style>
 </head>
 <body>
+  <!-- 画像を一番上に配置 -->
+  <img src="dead-by-daylight-1hg3x.jpg" alt="Dead by Daylight" class="header-img">
+
   <h1>DBDガチ勢チェックテスト</h1>
   <div id="progressBarContainer"><div id="progressBar"></div></div>
   <div class="container">
-    <div id="quiz">
-      <div class="question" id="question"></div>
-      <div class="options" id="options"></div>
-      <button id="backBtn" onclick="goBack()" disabled>戻る</button>
-    </div>
+    <div id="quiz"></div>
     <div id="result"></div>
   </div>
 
   <script>
     const questions = [
-      { text: "発電機を回さないサバイバーがいるとイラっとする", reverse: false },
-      { text: "リザルト画面で相手のパークやアドオンを確認し、反省や対策をする", reverse: false },
-      { text: "勝ち負けにこだわってプレイしている", reverse: false },
-      { text: "VCで味方にマップ報告することが多い", reverse: false },
-      { text: "通電を目的として遊んでいない", reverse: true },
-      { text: "ほぼ全てのパーク効果を把握している自信がある", reverse: false },
-      { text: "上級者のプレイ動画をよく見て勉強している", reverse: false },
-      { text: "スクショポイントを探したり、フレンド間で集まってエモートや屈伸で遊ぶことがある", reverse: true },
-      { text: "色んなおもしろパーク構成を試してプレイしている", reverse: true },
-      { text: "キャラクターが目立つスキンでも、面白さやかわいさの方を優先してスキンを選んでいる", reverse: true }
+      { text: "問1. 発電機を回さないサバイバーがいるとイラっとする", reverse: false },
+      { text: "問2. リザルト画面で相手のパークやアドオンを確認し、反省や対策をする", reverse: false },
+      { text: "問3. 勝ち負けにこだわってプレイしている", reverse: false },
+      { text: "問4. VCで味方にマップ報告することが多い", reverse: false },
+      { text: "問5. 通電を目的として遊んでいない", reverse: true },
+      { text: "問6. ほぼ全てのパーク効果を把握している自信がある", reverse: false },
+      { text: "問7. スクショポイントを探したり、フレンド間で集まってエモートや屈伸で遊ぶことがある", reverse: true },
+      { text: "問8. 上級者のプレイ動画をよく見て勉強している", reverse: false },
+      { text: "問9. 色んなおもしろパーク構成を試してプレイしている", reverse: true },
+      { text: "問10. キャラクターが目立つスキンでも、面白さやかわいさの方を優先してスキンを選んでいる", reverse: true }
     ];
 
     const options = [
@@ -88,78 +88,68 @@
     ];
 
     let currentQuestion = 0;
-    let score = 0;
-    let answers = [];
+    let scores = [];
 
-    function loadQuestion() {
-      document.getElementById("question").innerText = questions[currentQuestion].text;
-      const opts = document.getElementById("options");
-      opts.innerHTML = "";
-      options.forEach((opt, index) => {
-        const btn = document.createElement("button");
-        btn.innerText = opt;
-        btn.classList.add("option-btn");
-        btn.onclick = () => selectAnswer(index + 1);
-        opts.appendChild(btn);
-      });
-      document.getElementById("backBtn").disabled = currentQuestion === 0;
-      updateProgress();
-    }
-
-    function selectAnswer(choice) {
-      const q = questions[currentQuestion];
-      let point = q.reverse ? (6 - choice) : choice;
-
-      answers[currentQuestion] = point;
-      score = answers.reduce((a, b) => a + (b || 0), 0);
-
-      currentQuestion++;
+    function showQuestion() {
       if (currentQuestion < questions.length) {
-        loadQuestion();
+        const q = questions[currentQuestion];
+        document.getElementById("quiz").innerHTML = `
+          <div class="question">${q.text}</div>
+          <div class="options">
+            ${options.map((opt, i) => 
+              `<button class="option-btn" onclick="selectAnswer(${i+1})">${opt}</button>`
+            ).join("")}
+          </div>
+          ${currentQuestion > 0 ? `<button id="backBtn" onclick="goBack()">戻る</button>` : ""}
+        `;
+        document.getElementById("progressBar").style.width = `${(currentQuestion / questions.length) * 100}%`;
       } else {
         showResult();
       }
     }
 
+    function selectAnswer(value) {
+      const q = questions[currentQuestion];
+      const score = q.reverse ? 6 - value : value;
+      scores[currentQuestion] = score;
+      currentQuestion++;
+      showQuestion();
+    }
+
     function goBack() {
       if (currentQuestion > 0) {
         currentQuestion--;
-        answers[currentQuestion] = null;
-        score = answers.reduce((a, b) => a + (b || 0), 0);
-        loadQuestion();
+        showQuestion();
       }
     }
 
-    function updateProgress() {
-      const percent = ((currentQuestion) / questions.length) * 100;
-      document.getElementById("progressBar").style.width = percent + "%";
-    }
-
     function showResult() {
-      document.getElementById("quiz").style.display = "none";
-      let resultText = "";
-      if (score <= 15) resultText = "超絶エンジョイ勢";
-      else if (score <= 20) resultText = "エンジョイ勢";
-      else if (score <= 25) resultText = "ややエンジョイ勢寄り";
-      else if (score <= 35) resultText = "どちらでもない";
-      else if (score <= 40) resultText = "ややガチ勢寄り";
-      else if (score <= 45) resultText = "ガチ勢";
-      else resultText = "超絶ガチ勢";
+      const total = scores.reduce((a, b) => a + b, 0);
+      let rank = "";
+      if (total <= 15) rank = "超絶エンジョイ勢";
+      else if (total <= 20) rank = "エンジョイ勢";
+      else if (total <= 25) rank = "ややエンジョイ勢寄り";
+      else if (total <= 35) rank = "どちらでもない";
+      else if (total <= 40) rank = "ややガチ勢寄り";
+      else if (total <= 45) rank = "ガチ勢";
+      else rank = "超絶ガチ勢";
 
+      document.getElementById("quiz").innerHTML = "";
       document.getElementById("result").innerHTML = `
-        <p>あなたのスコアは <strong>${score}</strong> 点 / 50 点</p>
-        <p>判定: <strong>${resultText}</strong></p>
-        <button class="share-btn" onclick="shareResult('${resultText}', ${score})">結果をXでシェア</button>
+        <p>あなたのスコアは <strong>${total}</strong> 点</p>
+        <p>判定：<strong>${rank}</strong></p>
+        <button class="share-btn" onclick="shareResult(${total}, '${rank}')">結果をXでシェア</button>
       `;
+      document.getElementById("progressBar").style.width = "100%";
     }
 
-    function shareResult(resultText, score) {
+    function shareResult(score, rank) {
+      const text = `DBDガチ勢チェックテスト🎮\nスコア: ${score}/50\n判定: ${rank}\n\nあなたも挑戦してみよう！`;
       const url = encodeURIComponent(window.location.href);
-      const text = encodeURIComponent(`DBDガチ勢チェックの結果: ${score}点 / 50点 (${resultText}) #DBD #ガチ勢チェック`);
-      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`, "_blank");
     }
 
-    loadQuestion();
+    showQuestion();
   </script>
 </body>
 </html>
